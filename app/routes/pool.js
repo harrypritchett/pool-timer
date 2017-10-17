@@ -12,8 +12,8 @@ router.get('/', function(req, res) {
   var gpioObj = {};
 
   //Read values from GPIO pins and return some useful data
-  console.log("currentValue: " + pump.read());
-  gpioObj.pump = pump.read();
+  console.log("currentValue: " + pump.readSync());
+  gpioObj.pump = pump.readSync();
 
   var action = req.query.action;
   var originalState;
