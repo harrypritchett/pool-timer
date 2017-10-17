@@ -1,33 +1,46 @@
 var express = require('express');
+var Gpio = require('onoff').Gpio;
 // var Pool = require('../models/pool');
 
 var router = express.Router();
 
 router.get('/', function(req, res) {
-    // TODO: Read values from GPIO pins and return some useful data
-    var gpioObj = {
-      pump: true,
-      light: false,
-      heater: false
-    };
-    console.log('Handled GET request to \'/\' with action \'' + req.query.action + '\'');
-    var action = req.query.action
-    if (action) {
-      if ("pump" === action) {
-        console.log("Pump switching: " + gpioObj.pump + " to " + !gpioObj.pump);
-        gpioObj.pump = !gpioObj.pump;
-        //TODO: Toggle pump GPIO pin
-      } else if ("light" === action) {
-        console.log("Light switching: " + gpioObj.pump + " to " + !gpioObj.pump);
-        gpioObj.pump = !gpioObj.pump;
-      } else if ("heater" === action) {
-        console.log("Heater switching: " + gpioObj.pump + " to " + !gpioObj.pump);
-        gpioObj.pump = !gpioObj.pump;
-      }
-    }
+  console.log('Handled GET request to \'/\' with action \'' + req.query.action + '\'');
 
-    res.json(gpioObj);
+  var gpioObj = {};
+
+  //Read values from GPIO pins and return some useful data
+  var pump = new Gpio(17, 'out');
+  gpioObj.pump = pump.read();
+
+  var action = req.query.action;
+  var originalState;
+
+  if (action) {
+    if ("pump" === action) {
+      originalState = gpioObj.pump;
+      gpioObj.pump = gpioObj.pump == 1 ? 0 : 1;
+      pump.writeSync(gpioObj.pump);
+      console.log("Pump switching: " + formatValue(gpioObj.pump) + " to " + (gpioObj.pump));
+    } else if ("light" === action) {
+      console.log("Light switching: " + gpioObj.pump + " to " + !gpioObj.pump);
+      gpioObj.pump = !gpioObj.pump;
+    } else if ("heater" === action) {
+      console.log("Heater switching: " + gpioObj.pump + " to " + !gpioObj.pump);
+      gpioObj.pump = !gpioObj.pump;
+    }
+  }
+
+  //cleanup
+  pump.unexport();
+
+
+  res.json(gpioObj);
 });
+
+function formatValue(value) {
+  return value == 1 ? 'ON' : 'OFF';
+}
 
 // router.post('/', function(req, res) {
 //     var newsPost = new News();
