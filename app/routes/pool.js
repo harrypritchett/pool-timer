@@ -4,13 +4,15 @@ var Gpio = require('onoff').Gpio;
 
 var router = express.Router();
 
+var pump = new Gpio(16, 'out');
+
 router.get('/', function(req, res) {
   console.log('Handled GET request to \'/\' with action \'' + req.query.action + '\'');
 
   var gpioObj = {};
 
   //Read values from GPIO pins and return some useful data
-  var pump = new Gpio(17, 'out');
+
   gpioObj.pump = pump.read();
 
   var action = req.query.action;
@@ -19,9 +21,9 @@ router.get('/', function(req, res) {
   if (action) {
     if ("pump" === action) {
       originalState = gpioObj.pump;
-      gpioObj.pump = gpioObj.pump == 1 ? 0 : 1;
+      gpioObj.pump = gpioObj.pump == 1 ? 1 : 0;
       pump.writeSync(gpioObj.pump);
-      console.log("Pump switching: " + formatValue(gpioObj.pump) + " to " + (gpioObj.pump));
+      console.log("Pump switching: " + formatValue(gpioObj.pump) + " to " + formatValue(gpioObj.pump));
     } else if ("light" === action) {
       console.log("Light switching: " + gpioObj.pump + " to " + !gpioObj.pump);
       gpioObj.pump = !gpioObj.pump;
@@ -32,8 +34,6 @@ router.get('/', function(req, res) {
   }
 
   //cleanup
-  pump.unexport();
-
 
   res.json(gpioObj);
 });
