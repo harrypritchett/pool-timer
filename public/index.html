@@ -1,0 +1,40 @@
+<html>
+<head>
+
+</head>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script>
+ $(document).ready(function() {
+   var pool = {};
+   $.get('http://localhost:5001/api/pool', function(data, status) {
+     console.log('received data: ' + JSON.stringify(data));
+     pool = data;
+     $("#pump").text("Pool Pump: " + onOffText(data.pump));
+     $("#light").text("Light: " + onOffText(data.light));
+     $("#heater").text("Heater: " + onOffText(data.heater));
+   });
+ });
+
+ function onOffText(data) {
+   return data ? "ON" : "OFF";
+ }
+
+ function buttonClick(action) {
+   console.log('You clicked the button. Make an API call.');
+   $.get('http://localhost:5001/api/pool?action=' + action, function(data, status) {
+     var value = onOffText(eval('data.' + action));
+     window.alert("Turned the " + action + " " + value);
+     $("#" + action).text(action + " " + value);
+   });
+ }
+</script>
+<body>
+  <h1>Pool Timer</h1>
+  <p id="pump">Pool Pump: </p>
+  <p id="light">Light: </p>
+  <p id="heater">Heater: </p>
+  <button onclick="buttonClick('pump')">Toggle Pump</button>
+  <button onclick="buttonClick('light')">Toggle Light</button>
+  <button onclick="buttonClick('heater')">Toggle Heater</button>
+</body>
+</html>
